@@ -14,7 +14,14 @@ if d:=os.getenv("DEVICE"):
   if dev not in ["cuda","cpu","mps"]: raise ValueError("Invalid device.")
   device = dev
 else:
-  device = "mps" if torch.backends.mps.is_available() else "cpu"
+  device = "mps" if torch.backends.mps.is_available() else "cpu" 
+
+
+EPOCHS = os.getenv("EPOCHS",None) 
+if not EPOCHS: 
+    EPOCHS = 50 
+else:
+    EPOCHS = int(EPOCHS)
 
 class Net(nn.Module):
 	def __init__(self):
@@ -59,7 +66,7 @@ if __name__ == "__main__":
 # Training Loop 
     print_every = 100 
 
-    for epoch in range(50):  # loop over the dataset multiple times
+    for epoch in range(EPOCHS):  # loop over the dataset multiple times
         running_loss = 0.0
         # Use enumerate to get a batch index (i)
         for i, (X_batch, y_batch) in enumerate(train_loader):
