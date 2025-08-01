@@ -6,6 +6,8 @@ Dataset from: https://www.kaggle.com/datasets/gpiosenka/cards-image-datasetclass
 
 ## Steps 
 
-1. Run train.py 
-2. Run inference.py and pass in path of image: python3 inference.py path_to_image 
+1. Download dataset from the source above 
+2. Create a data directory in root of project and unzip dataset inside that directory
+3. Run train.py 
+4. Run inference.py and pass in path of image: python3 inference.py path_to_image 
 
