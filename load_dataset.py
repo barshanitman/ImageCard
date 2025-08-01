@@ -27,8 +27,8 @@ def get_training_dataset() -> Tuple:
       imgs.append(np_arr)  
       y.append(row["class index"])
   X_numpy = np.stack(imgs,axis=0)  
-  X = torch.from_numpy(X_numpy) 
-  y = torch.tensor(y) 
+  X = torch.from_numpy(X_numpy).float()
+  y = torch.tensor(y).long()
   return X,y 
 
 if __name__ == "__main__":  
