@@ -1,7 +1,7 @@
 #!/Users/barshanitman/Desktop/Repos/ImageCard/env/bin/python
 
 import os
-import torch  
+import torch
 from pathlib import Path
 import pandas as pd
 import numpy as np
@@ -11,14 +11,7 @@ from typing import Tuple
 data_dir = str(Path(__file__).parent / "data" / "cards.csv")
 base_dir = str(Path(__file__).parent  / "data") 
 
-def get_training_dataset() -> Tuple:
-  if d:=os.getenv("DEVICE"):  
-    dev = d.lower()
-    if dev not in ["cuda","cpu","mps"]: raise ValueError("Invalid device.")
-    device = dev
-  else:
-    device = "mps" if torch.backends.mps.is_available() else "cpu"
-
+def get_training_dataset() -> Tuple: 
   df = pd.read_csv(data_dir)  
 
   # Train Data 
@@ -33,7 +26,11 @@ def get_training_dataset() -> Tuple:
       np_arr = np.array(img)
       imgs.append(np_arr)  
       y.append(row["class index"])
-  X_numpy = np.concatenate(imgs,axis=0)  
+  X_numpy = np.stack(imgs,axis=0)  
   X = torch.from_numpy(X_numpy) 
-  y = torch.tensor(y)
-  return X,y
+  y = torch.tensor(y) 
+  return X,y 
+
+if __name__ == "__main__":  
+  X,y = get_training_dataset() 
+  breakpoint()
