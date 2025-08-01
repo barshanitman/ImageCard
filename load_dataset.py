@@ -37,4 +37,3 @@ def get_training_dataset() -> Tuple:
   X = torch.from_numpy(X_numpy) 
   y = torch.tensor(y)
   return X,y
-
