@@ -46,7 +46,6 @@ if __name__ == "__main__":
         raise FileNotFoundError(f"{model_path} does not exist. Run train.py first.") 
 
     itol = get_labels()
-    breakpoint()
 
     loaded_model = Net()  
     loaded_model.load_state_dict(torch.load(model_path)) 
