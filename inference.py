@@ -10,7 +10,17 @@ import argparse
 import pandas as pd 
 from pathlib import Path 
 
-data_csv_path = Path(__file__).parent / "data" / "cards.csv"
+data_csv_path = Path(__file__).parent / "data" / "cards.csv" 
+
+
+if d:=os.getenv("DEVICE"):
+  dev = d.lower()
+  if dev not in ["cuda","cpu","mps"]: raise ValueError("Invalid device.")
+  device = dev
+else:
+  device = "mps" if torch.backends.mps.is_available() else "cpu"
+
+
 
 def get_labels():  
     itol = {}
@@ -24,7 +34,7 @@ def prepare_image(path:str):
     img = Image.open(path)  
     np_arr = np.array([img])
     x = torch.from_numpy(np_arr).float()  
-    x = x.permute(0,3,1,2) 
+    x = x.permute(0,3,1,2).to(device)
     dataset_mean = torch.mean(x, dim=(0, 2, 3))
     dataset_std = torch.std(x, dim=(0, 2, 3))
     normalize = transforms.Normalize(dataset_mean,dataset_std)
@@ -47,7 +57,7 @@ if __name__ == "__main__":
 
     itol = get_labels()
 
-    loaded_model = Net()  
+    loaded_model = Net().to(device)
     loaded_model.load_state_dict(torch.load(model_path)) 
     loaded_model.eval()   
     x = prepare_image(args.image)
