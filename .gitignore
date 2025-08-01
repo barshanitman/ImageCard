@@ -2,3 +2,4 @@ env/
 data/
 *.swp 
 __pycache__/
+*.pth
