@@ -14,22 +14,7 @@ if d:=os.getenv("DEVICE"):
   if dev not in ["cuda","cpu","mps"]: raise ValueError("Invalid device.")
   device = dev
 else:
-  device = "mps" if torch.backends.mps.is_available() else "cpu"  
-
-X,y = get_training_dataset() 
-X = X.permute(0,3,1,2).to(device) # Make it into N,C,H,W  
-y = y.to(device)
-dataset_mean = torch.mean(X, dim=(0, 2, 3))
-dataset_std = torch.std(X, dim=(0, 2, 3))
-normalize = transforms.Normalize(dataset_mean,dataset_std)  
-X = normalize(X) 
-
-train_dataset = TensorDataset(X, y)
-
-batch_size = 64
-train_loader = DataLoader(dataset=train_dataset, 
-                          batch_size=batch_size, 
-                          shuffle=True) # shuffle=True is crucial for training
+  device = "mps" if torch.backends.mps.is_available() else "cpu"
 
 class Net(nn.Module):
 	def __init__(self):
@@ -50,36 +35,55 @@ class Net(nn.Module):
 			x = self.fc3(x)
 			return x
 
-net = Net().to(device)
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9) 
+
+if __name__ == "__main__":
+    X,y = get_training_dataset() 
+    X = X.permute(0,3,1,2).to(device) # Make it into N,C,H,W  
+    y = y.to(device)
+    dataset_mean = torch.mean(X, dim=(0, 2, 3))
+    dataset_std = torch.std(X, dim=(0, 2, 3))
+    normalize = transforms.Normalize(dataset_mean,dataset_std)  
+    X = normalize(X) 
+
+    train_dataset = TensorDataset(X, y)
+
+    batch_size = 64
+    train_loader = DataLoader(dataset=train_dataset, 
+                              batch_size=batch_size, 
+                              shuffle=True) # shuffle=True is crucial for training
+
+    net = Net().to(device)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9) 
 
 # Training Loop 
-print_every = 100 
+    print_every = 100 
 
-for epoch in range(100):  # loop over the dataset multiple times
-    running_loss = 0.0
-    
-    # Use enumerate to get a batch index (i)
-    for i, (X_batch, y_batch) in enumerate(train_loader):
-        
-        # Training steps
-        optimizer.zero_grad()
-        outputs = net(X_batch)
-        loss = criterion(outputs, y_batch)
-        loss.backward()
-        optimizer.step()
-
-        # Accumulate loss
-        running_loss += loss.item()
-
-        # Print statistics every `print_every` batches
-        if (i + 1) % print_every == 0:
-            avg_loss = running_loss / print_every
-            print(f'Epoch: {epoch + 1}, Batch: {i + 1}/{len(train_loader)}, Loss: {avg_loss:.3f}')
+    for epoch in range(50):  # loop over the dataset multiple times
+        running_loss = 0.0
+        # Use enumerate to get a batch index (i)
+        for i, (X_batch, y_batch) in enumerate(train_loader):
             
-            # Reset running_loss after printing
-            running_loss = 0.0
+            # Training steps
+            optimizer.zero_grad()
+            outputs = net(X_batch)
+            loss = criterion(outputs, y_batch)
+            loss.backward()
+            optimizer.step()
 
-print('Finished Training')
+            # Accumulate loss
+            running_loss += loss.item()
 
+            # Print statistics every `print_every` batches
+            if (i + 1) % print_every == 0:
+                avg_loss = running_loss / print_every
+                print(f'Epoch: {epoch + 1}, Batch: {i + 1}/{len(train_loader)}, Loss: {avg_loss:.3f}')
+                
+                # Reset running_loss after printing
+                running_loss = 0.0
+
+    print('Finished Training') 
+    print('Saving model..')  
+    save_path = "./card_net.pth"
+    torch.save(net.state_dict(),save_path) 
+    print('Model saved!')  
